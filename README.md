@@ -21,7 +21,7 @@ A Python automation tool using Playwright to simulate Pixiv OAuth login, capture
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourname/pixiv-token.git
+git clone https://github.com/piglig/pixiv-token.git
 cd pixiv-token
 ```
 
