@@ -6,6 +6,7 @@ import time
 import re
 from playwright.sync_api import sync_playwright, TimeoutError
 
+
 PIXIV_CLIENT_ID = "MOBrBDS8blbauoSck0ZfDbtuzpyT"
 PIXIV_CLIENT_SECRET = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj"
 PIXIV_TOKEN_URL = "https://oauth.secure.pixiv.net/auth/token"
@@ -54,46 +55,53 @@ class PixivTokenFetcher:
 
     def fetch_code(self):
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=self.headless, devtools=True, args=["--disable-blink-features=AutomationControlled"])
-            context = browser.new_context(
-                viewport={"width": 1280, "height": 800},
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-                locale="ja-JP",
-                timezone_id="Asia/Tokyo"
-            )
+            browser = p.chromium.launch(headless=self.headless, args=["--disable-blink-features=AutomationControlled"])
+            context = browser.new_context()
             page = context.new_page()
-
-            captured_code = {"value": None}
-
-            def intercept_console(msg):
-                text = msg.text
-                match = re.search(r"pixiv://account/login\?code=([\w-]+)", text)
-                if match:
-                    captured_code["value"] = match.group(1)
-                    print("✅ Authorization code captured from console:", captured_code["value"])
-
-            page.on("console", intercept_console)
+            cdp_session = context.new_cdp_session(page)
+            cdp_session.send("Network.enable")
 
             print("🚀 Opening Pixiv login page...")
             page.goto(self.get_login_url())
-            print("📥 Typing username and password slowly...")
-            self.perform_auto_login(page, self.username, self.password)
 
-            # 🎯 Wait up to 60 seconds for code capture
-            for i in range(60):
-                if captured_code["value"]:
-                    print("✅ Code captured early. Closing browser.")
-                    browser.close()
-                    return captured_code["value"]
+            captured_code = {"value": None}
+
+            def cleanup_and_return(code):
                 try:
-                    page.wait_for_url("https://accounts.pixiv.net/post-redirect*", timeout=1000)
+                    page.close()
                 except:
                     pass
-                time.sleep(1)
+                try:
+                    context.close()
+                except:
+                    pass
+                try:
+                    browser.close()
+                except:
+                    pass
+                return code
 
-            print("⌛ Timeout reached. Code not captured. Closing browser.")
-            browser.close()
-            return None
+            def on_request_will_be_sent(event):
+                url = event.get("request", {}).get("url", "")
+                check_url = url or event.get("documentURL", "")
+                if check_url.startswith("pixiv://account/login"):
+                    match = re.search(r"code=([\w-]+)", check_url)
+                    if match:
+                        captured_code["value"] = match.group(1)
+                        print("✅ Code captured via CDP:", captured_code["value"], flush=True)
+                        # Trick: close page to interrupt wait loop
+                        page.close()
+
+            cdp_session.on("Network.requestWillBeSent", on_request_will_be_sent)
+
+            self.perform_auto_login(page, self.username, self.password)
+
+            try:
+                page.wait_for_event("close", timeout=10000)
+            except TimeoutError:
+                print("⌛ Timeout: Code not captured.")
+
+            return cleanup_and_return(captured_code["value"])
 
     def exchange_token(self, code):
         data = {

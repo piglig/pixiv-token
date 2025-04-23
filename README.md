@@ -12,7 +12,7 @@ A Python automation tool using Playwright to simulate Pixiv OAuth login, capture
 - ✅ Console-based code capture
 - ✅ Access token & refresh token retrieval
 - ✅ Slow typing to bypass bot detection
-- ✅ Supports headless and visible mode
+- ⬜ Supports ~~headless~~ and visible mode
 
 ---
 
@@ -21,8 +21,8 @@ A Python automation tool using Playwright to simulate Pixiv OAuth login, capture
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourname/pixiv-token-fetcher.git
-cd pixiv-token-fetcher
+git clone https://github.com/yourname/pixiv-token.git
+cd pixiv-token
 ```
 
 ### 2. Install dependencies
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     fetcher = PixivTokenFetcher(
         username="your_pixiv_email",
         password="your_pixiv_password",
-        headless=False  # set True to enable headless mode
+        headless=False
     )
     code = fetcher.fetch_code()
     if code:
@@ -73,13 +73,7 @@ if __name__ == "__main__":
 
 ## 🧪 Example Output
 
-```
-🚀 Opening Pixiv login page...
-📥 Typing username and password slowly...
-✅ Authorization code successfully obtained: XXXXXXXXXXXX
-🎟️ Access Token: xxxxxxxx
-🔁 Refresh Token: yyyyyyyy
-```
+![example](./docs/example.png)
 
 ---
 

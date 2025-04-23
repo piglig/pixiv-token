@@ -12,7 +12,7 @@
 - ✅ 控制台提取授权 code
 - ✅ 获取 access_token 与 refresh_token
 - ✅ 缓慢输入绕过机器人检测
-- ✅ 支持无头模式与窗口模式
+- ⬜ 支持~~无头模式~~与窗口模式
 
 ---
 
@@ -21,8 +21,8 @@
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/yourname/pixiv-token-fetcher.git
-cd pixiv-token-fetcher
+git clone https://github.com/yourname/pixiv-token.git
+cd pixiv-token
 ```
 
 ### 2. 安装依赖
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     fetcher = PixivTokenFetcher(
         username="你的Pixiv账号",
         password="你的Pixiv密码",
-        headless=False  # 设置 True 表示无头模式
+        headless=False
     )
     code = fetcher.fetch_code()
     if code:
@@ -73,13 +73,7 @@ if __name__ == "__main__":
 
 ## 🧪 示例输出
 
-```
-🚀 打开 Pixiv 登录页...
-📥 正在缓慢输入用户名与密码...
-✅ 成功捕获授权 code: XXXXXXXXXXXX
-🎟️ Access Token: xxxxxxxx
-🔁 Refresh Token: yyyyyyyy
-```
+![example](./docs/example.png)
 
 ---
 
