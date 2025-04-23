@@ -1,0 +1,24 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VSCode 配置（如果你不想提交 IDE 设置）
+.vscode/
+
+# 虚拟环境目录
+.venv/
+
+# 环境变量和配置文件（如有）
+.env
+*.env
+
+# pip 缓存
+pip-wheel-metadata/
+
+# 日志文件
+*.log
+
+# macOS / Windows 系统文件
+.DS_Store
+Thumbs.db
