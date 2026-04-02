@@ -9,7 +9,7 @@ A Python automation tool using Playwright to simulate Pixiv OAuth login, capture
 ## 📦 Features
 
 - ✅ Automated Pixiv login (username/password)
-- ✅ Headless mode support (Chrome `--headless=new`, bypasses reCAPTCHA detection)
+- ✅ Headless mode support
 - ✅ Visible (non-headless) mode support
 - ✅ Console-based authorization code capture via CDP
 - ✅ Access token & refresh token retrieval

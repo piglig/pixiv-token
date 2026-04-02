@@ -9,7 +9,7 @@
 ## 📦 功能亮点
 
 - ✅ 自动化模拟 Pixiv 登录流程（用户名密码）
-- ✅ 支持无头模式（Chrome `--headless=new`，可绕过 reCAPTCHA 检测）
+- ✅ 支持无头模式
 - ✅ 支持窗口模式（非无头）
 - ✅ 通过 CDP 在控制台捕获授权码
 - ✅ 获取 access_token 与 refresh_token
