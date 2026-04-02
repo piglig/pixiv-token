@@ -9,10 +9,13 @@ A Python automation tool using Playwright to simulate Pixiv OAuth login, capture
 ## 📦 Features
 
 - ✅ Automated Pixiv login (username/password)
-- ✅ Console-based code capture
+- ✅ Headless mode support (Chrome `--headless=new`, bypasses reCAPTCHA detection)
+- ✅ Visible (non-headless) mode support
+- ✅ Console-based authorization code capture via CDP
 - ✅ Access token & refresh token retrieval
 - ✅ Slow typing to bypass bot detection
-- ⬜ Supports ~~headless~~ and visible mode
+- ✅ Auto-skip security prompt pages (Passkeys / 2FA reminders)
+- ✅ Multi-selector fallback for Pixiv login form compatibility
 
 ---
 
@@ -31,7 +34,7 @@ Recommended Python version: `>=3.8`
 
 ```bash
 pip install -r requirements.txt
-playwright install
+playwright install chromium
 ```
 
 Sample requirements.txt:
@@ -45,35 +48,67 @@ playwright>=1.51.0
 
 ## ⚙️ Usage
 
-Edit and run `pixiv_token_fetcher.py`:
+### Command line
+
+```bash
+# Headless mode (default)
+python pixiv_token_fetcher.py -u "your_email" -p "your_password"
+
+# Visible browser mode
+python pixiv_token_fetcher.py -u "your_email" -p "your_password" --no-headless
+```
+
+### As a module
 
 ```python
-if __name__ == "__main__":
-    fetcher = PixivTokenFetcher(
-        username="your_pixiv_email",
-        password="your_pixiv_password",
-        headless=False
-    )
-    code = fetcher.fetch_code()
-    if code:
-        token_info = fetcher.exchange_token(code)
-        print("Access Token:", token_info.get("access_token"))
-        print("Refresh Token:", token_info.get("refresh_token"))
+from pixiv_token_fetcher import PixivTokenFetcher
+
+fetcher = PixivTokenFetcher(
+    username="your_pixiv_email",
+    password="your_pixiv_password",
+    headless=True,  # Set to False to show browser window
+)
+code = fetcher.fetch_code()
+if code:
+    token_info = fetcher.exchange_token(code)
+    print("Access Token:", token_info.get("access_token"))
+    print("Refresh Token:", token_info.get("refresh_token"))
 ```
+
+---
+
+## 🔧 How It Works
+
+1. **PKCE Generation** — Generates `code_verifier` and `code_challenge` for OAuth PKCE flow
+2. **Browser Launch** — Uses Chrome's native `--headless=new` mode (full browser engine without a visible window, undetectable by reCAPTCHA)
+3. **Auto Login** — Fills in email/password with slow typing to mimic human input
+4. **Code Capture** — Intercepts the `pixiv://account/login?code=...` redirect via CDP (`Network.requestWillBeSent`)
+5. **Security Prompt Handling** — Automatically clicks "Remind me later" / "Skip" if Pixiv shows a Passkeys/2FA setup page
+6. **Token Exchange** — Exchanges the authorization code for access & refresh tokens via Pixiv OAuth API
 
 ---
 
 ## 📌 Notes
 
-- ⚠️ Do not hardcode credentials in production environments.
-- ❌ This is not an official Pixiv SDK.
+- ⚠️ Do not hardcode credentials in production environments. Use environment variables or a secrets manager.
+- ❌ This is not an official Pixiv SDK. Changes to Pixiv's login page may affect functionality.
 - 🛡 Please comply with Pixiv's Terms of Service.
+- 🔁 The refresh token is long-lived. You typically only need to run this tool once.
 
 ---
 
 ## 🧪 Example Output
 
-![example](./docs/example.png)
+```
+🚀 Opening Pixiv login page...
+📧 Username input completed
+🔒 Password input completed
+🔑 Login submitted
+  Clicking 'Remind me later' to skip security prompt
+✅ Code captured: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+🎟️ Access Token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+🔁 Refresh Token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
 
 ---
 
